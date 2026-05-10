@@ -484,15 +484,31 @@ else:
 st.sidebar.divider()
 st.sidebar.subheader("Custom ticks")
 
-custom_xticks = st.sidebar.text_input(
-    "X ticks, comma-separated",
-    value="-0.6,-0.4,-0.2,0,0.2,0.4,0.6",
+use_custom_xticks = st.sidebar.checkbox(
+    "Use custom X ticks",
+    value=False,
 )
 
-custom_yticks = st.sidebar.text_input(
-    "Y ticks, comma-separated",
-    value="",
+if use_custom_xticks:
+    custom_xticks = st.sidebar.text_input(
+        "X ticks, comma-separated",
+        value="-0.6,-0.4,-0.2,0,0.2,0.4,0.6",
+    )
+else:
+    custom_xticks = ""
+
+use_custom_yticks = st.sidebar.checkbox(
+    "Use custom Y ticks",
+    value=False,
 )
+
+if use_custom_yticks:
+    custom_yticks = st.sidebar.text_input(
+        "Y ticks, comma-separated",
+        value="",
+    )
+else:
+    custom_yticks = ""
 
 st.sidebar.divider()
 st.sidebar.subheader("Export settings")
