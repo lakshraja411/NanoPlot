@@ -69,6 +69,9 @@ def make_plot(
     figure_height,
     dpi,
     curve_styles,
+    show_origin_lines,
+    origin_line_color,
+    origin_line_width,
 ):
     """Create a clean Origin-style matplotlib figure."""
 
@@ -149,6 +152,23 @@ def make_plot(
 
     ax.minorticks_off()
     ax.grid(False)
+
+    if show_origin_lines:
+        ax.axhline(
+            y=0,
+            color=origin_line_color,
+            linestyle="--",
+            linewidth=origin_line_width,
+            zorder=0,
+        )
+
+        ax.axvline(
+            x=0,
+            color=origin_line_color,
+            linestyle="--",
+            linewidth=origin_line_width,
+            zorder=0,
+        )
 
     for spine in ax.spines.values():
         spine.set_visible(True)
@@ -373,6 +393,27 @@ for i, col in enumerate(y_cols):
         }
 
 st.sidebar.divider()
+st.sidebar.subheader("Reference lines")
+
+show_origin_lines = st.sidebar.checkbox(
+    "Show dashed origin lines",
+    value=False,
+)
+
+origin_line_color = st.sidebar.color_picker(
+    "Origin line colour",
+    value="#808080",
+)
+
+origin_line_width = st.sidebar.slider(
+    "Origin line width",
+    0.5,
+    3.0,
+    1.0,
+    0.1,
+)
+
+st.sidebar.divider()
 st.sidebar.subheader("Axis limits")
 
 use_x_limits = st.sidebar.checkbox("Set X limits", value=False)
@@ -441,6 +482,9 @@ try:
         figure_height=figure_height,
         dpi=dpi,
         curve_styles=curve_styles,
+        show_origin_lines=show_origin_lines,
+        origin_line_color=origin_line_color,
+        origin_line_width=origin_line_width,
     )
 except Exception as e:
     st.error(f"Could not create plot: {e}")
