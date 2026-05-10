@@ -490,10 +490,28 @@ use_custom_xticks = st.sidebar.checkbox(
 )
 
 if use_custom_xticks:
-    custom_xticks = st.sidebar.text_input(
-        "X ticks, comma-separated",
-        value="-0.6,-0.4,-0.2,0,0.2,0.4,0.6",
+    x_tick_step = st.sidebar.number_input(
+        "X tick spacing",
+        min_value=0.0001,
+        value=0.2,
+        step=0.1,
+        format="%.4f",
     )
+
+    x_start = st.sidebar.number_input(
+        "X tick start",
+        value=float(df[x_col].min()),
+        format="%.4f",
+    )
+
+    x_end = st.sidebar.number_input(
+        "X tick end",
+        value=float(df[x_col].max()),
+        format="%.4f",
+    )
+
+    x_ticks = np.arange(x_start, x_end + x_tick_step, x_tick_step)
+    custom_xticks = ",".join([str(round(x, 6)) for x in x_ticks])
 else:
     custom_xticks = ""
 
@@ -503,10 +521,28 @@ use_custom_yticks = st.sidebar.checkbox(
 )
 
 if use_custom_yticks:
-    custom_yticks = st.sidebar.text_input(
-        "Y ticks, comma-separated",
-        value="",
+    y_tick_step = st.sidebar.number_input(
+        "Y tick spacing",
+        min_value=0.0001,
+        value=20.0,
+        step=1.0,
+        format="%.4f",
     )
+
+    y_start = st.sidebar.number_input(
+        "Y tick start",
+        value=float(all_y_converted.min()),
+        format="%.4f",
+    )
+
+    y_end = st.sidebar.number_input(
+        "Y tick end",
+        value=float(all_y_converted.max()),
+        format="%.4f",
+    )
+
+    y_ticks = np.arange(y_start, y_end + y_tick_step, y_tick_step)
+    custom_yticks = ",".join([str(round(y, 6)) for y in y_ticks])
 else:
     custom_yticks = ""
 
