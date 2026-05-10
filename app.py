@@ -68,20 +68,52 @@ def make_plot(
     figure_height,
     dpi,
 ):
-    """Create an Origin-style matplotlib figure."""
+    """Create a clean Origin-style matplotlib figure."""
+
+    # Origin-like global style
+    plt.rcParams.update({
+        "font.family": "Arial",
+        "font.size": 11,
+        "axes.linewidth": 1.4,
+        "axes.edgecolor": "black",
+        "axes.facecolor": "white",
+        "figure.facecolor": "white",
+        "savefig.facecolor": "white",
+        "xtick.color": "black",
+        "ytick.color": "black",
+        "axes.labelcolor": "black",
+        "legend.frameon": False,
+    })
 
     fig, ax = plt.subplots(figsize=(figure_width, figure_height), dpi=dpi)
 
-    for col in y_cols:
+    # Origin-like colour cycle
+    origin_colors = [
+        "black",
+        "red",
+        "blue",
+        "green",
+        "magenta",
+        "orange",
+        "purple",
+        "brown",
+    ]
+
+    for i, col in enumerate(y_cols):
         y_data = convert_current(df[col], current_unit)
+        color = origin_colors[i % len(origin_colors)]
 
         if show_markers:
             ax.plot(
                 df[x_col],
                 y_data,
                 linewidth=line_width,
-                marker="o",
+                marker="s",
                 markersize=marker_size,
+                markerfacecolor=color,
+                markeredgecolor="black",
+                markeredgewidth=0.5,
+                color=color,
                 label=col,
             )
         else:
@@ -89,14 +121,15 @@ def make_plot(
                 df[x_col],
                 y_data,
                 linewidth=line_width,
+                color=color,
                 label=col,
             )
 
-    ax.set_xlabel(x_label, fontsize=12)
-    ax.set_ylabel(y_label, fontsize=12)
+    ax.set_xlabel(x_label, fontsize=13, labelpad=8)
+    ax.set_ylabel(y_label, fontsize=13, labelpad=8)
 
     if title.strip():
-        ax.set_title(title, fontsize=13)
+        ax.set_title(title, fontsize=13, pad=10)
 
     if x_min is not None or x_max is not None:
         ax.set_xlim(left=x_min, right=x_max)
@@ -112,20 +145,34 @@ def make_plot(
         ticks = [float(y.strip()) for y in custom_yticks.split(",") if y.strip()]
         ax.set_yticks(ticks)
 
+    # Origin-style ticks: inward, only major ticks, no grid
     ax.tick_params(
+        axis="both",
+        which="major",
         direction="in",
-        length=4,
-        width=1,
-        labelsize=10,
+        length=5,
+        width=1.2,
+        labelsize=11,
+        top=False,
+        right=False,
     )
 
     ax.minorticks_off()
+    ax.grid(False)
 
+    # Boxed axes like Origin
     for spine in ax.spines.values():
-        spine.set_linewidth(1.2)
+        spine.set_visible(True)
+        spine.set_linewidth(1.4)
+        spine.set_color("black")
 
     if show_legend:
-        ax.legend(frameon=False, fontsize=10)
+        ax.legend(
+            frameon=False,
+            fontsize=10,
+            loc="best",
+            handlelength=2.5,
+        )
 
     fig.tight_layout()
     return fig
