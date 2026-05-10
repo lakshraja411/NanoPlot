@@ -157,10 +157,13 @@ def make_plot(
 
     if show_legend:
         ax.legend(
-            frameon=False,
+            frameon=True,
             fontsize=legend_fontsize,
             loc=legend_location,
             handlelength=2.5,
+            edgecolor="black",
+            facecolor="white",
+            framealpha=1.0,
         )
 
     fig.tight_layout()
