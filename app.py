@@ -57,8 +57,13 @@ def make_plot(
     show_legend,
     legend_fontsize,
     legend_location,
+    use_custom_legend_position,
+    legend_x,
+    legend_y,
+    legend_box,
     axis_label_fontsize,
     tick_fontsize,
+    tick_direction,
     x_min,
     x_max,
     y_min,
@@ -142,7 +147,7 @@ def make_plot(
     ax.tick_params(
         axis="both",
         which="major",
-        direction="in",
+        direction=tick_direction,
         length=5,
         width=1.2,
         labelsize=tick_fontsize,
@@ -176,15 +181,27 @@ def make_plot(
         spine.set_color("black")
 
     if show_legend:
-        ax.legend(
-            frameon=True,
-            fontsize=legend_fontsize,
-            loc=legend_location,
-            handlelength=2.5,
-            edgecolor="black",
-            facecolor="white",
-            framealpha=1.0,
-        )
+        if use_custom_legend_position:
+            legend = ax.legend(
+                frameon=legend_box,
+                fontsize=legend_fontsize,
+                loc="center",
+                bbox_to_anchor=(legend_x, legend_y),
+                handlelength=2.5,
+                edgecolor="black",
+                facecolor="white",
+                framealpha=1.0,
+            )
+        else:
+            legend = ax.legend(
+                frameon=legend_box,
+                fontsize=legend_fontsize,
+                loc=legend_location,
+                handlelength=2.5,
+                edgecolor="black",
+                facecolor="white",
+                framealpha=1.0,
+            )
 
     fig.tight_layout()
     return fig
@@ -266,10 +283,18 @@ st.sidebar.subheader("Global style")
 
 axis_label_fontsize = st.sidebar.slider("Axis label font size", 8, 24, 13, 1)
 tick_fontsize = st.sidebar.slider("Tick font size", 6, 20, 11, 1)
+tick_direction = st.sidebar.selectbox(
+    "Tick direction",
+    ["out", "in", "inout"],
+    index=0,
+)
+
 show_legend = st.sidebar.checkbox("Show legend", value=True)
 legend_fontsize = st.sidebar.slider("Legend font size", 6, 20, 10, 1)
+legend_box = st.sidebar.checkbox("Add box around legend", value=True)
+
 legend_location = st.sidebar.selectbox(
-    "Legend position",
+    "Legend preset position",
     [
         "best",
         "upper right",
@@ -283,6 +308,27 @@ legend_location = st.sidebar.selectbox(
         "center",
     ],
     index=0,
+)
+
+use_custom_legend_position = st.sidebar.checkbox(
+    "Use custom legend position",
+    value=False,
+)
+
+legend_x = st.sidebar.slider(
+    "Legend X position",
+    -0.5,
+    1.5,
+    0.75,
+    0.01,
+)
+
+legend_y = st.sidebar.slider(
+    "Legend Y position",
+    -0.5,
+    1.5,
+    0.85,
+    0.01,
 )
 
 st.sidebar.divider()
@@ -470,8 +516,13 @@ try:
         show_legend=show_legend,
         legend_fontsize=legend_fontsize,
         legend_location=legend_location,
+        use_custom_legend_position=use_custom_legend_position,
+        legend_x=legend_x,
+        legend_y=legend_y,
+        legend_box=legend_box,
         axis_label_fontsize=axis_label_fontsize,
         tick_fontsize=tick_fontsize,
+        tick_direction=tick_direction,
         x_min=x_min,
         x_max=x_max,
         y_min=y_min,
