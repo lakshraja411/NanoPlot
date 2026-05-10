@@ -167,6 +167,14 @@ def make_plot(
     return fig
 
 
+def fig_to_bytes(fig, file_format="png", dpi=300):
+    """Convert matplotlib figure to downloadable bytes."""
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format=file_format, dpi=dpi, bbox_inches="tight")
+    buffer.seek(0)
+    return buffer
+
+
 # ============================================================
 # MAIN APP
 # ============================================================
