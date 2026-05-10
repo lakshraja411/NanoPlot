@@ -257,7 +257,16 @@ legend_location = st.sidebar.selectbox(
 st.sidebar.divider()
 st.sidebar.subheader("Curve styles")
 
-origin_colors = ["black", "red", "blue", "green", "magenta", "orange", "purple", "brown"]
+origin_colors = [
+    "#000000",  # black
+    "#FF0000",  # red
+    "#0000FF",  # blue
+    "#008000",  # green
+    "#FF00FF",  # magenta
+    "#FFA500",  # orange
+    "#800080",  # purple
+    "#8B4513",  # brown
+]
 line_styles = {
     "Solid": "-",
     "Dashed": "--",
