@@ -54,10 +54,11 @@ def make_plot(
     x_label,
     y_label,
     title,
-    line_width,
-    show_markers,
-    marker_size,
     show_legend,
+    legend_fontsize,
+    legend_location,
+    axis_label_fontsize,
+    tick_fontsize,
     x_min,
     x_max,
     y_min,
@@ -67,10 +68,10 @@ def make_plot(
     figure_width,
     figure_height,
     dpi,
+    curve_styles,
 ):
     """Create a clean Origin-style matplotlib figure."""
 
-    # Origin-like global style
     plt.rcParams.update({
         "font.family": "Arial",
         "font.size": 11,
@@ -87,49 +88,39 @@ def make_plot(
 
     fig, ax = plt.subplots(figsize=(figure_width, figure_height), dpi=dpi)
 
-    # Origin-like colour cycle
-    origin_colors = [
-        "black",
-        "red",
-        "blue",
-        "green",
-        "magenta",
-        "orange",
-        "purple",
-        "brown",
-    ]
-
-    for i, col in enumerate(y_cols):
+    for col in y_cols:
         y_data = convert_current(df[col], current_unit)
-        color = origin_colors[i % len(origin_colors)]
+        style = curve_styles[col]
 
-        if show_markers:
+        if style["show_markers"]:
             ax.plot(
                 df[x_col],
                 y_data,
-                linewidth=line_width,
-                marker="s",
-                markersize=marker_size,
-                markerfacecolor=color,
-                markeredgecolor="black",
-                markeredgewidth=0.5,
-                color=color,
-                label=col,
+                color=style["color"],
+                linestyle=style["line_style"],
+                linewidth=style["line_width"],
+                marker=style["marker"],
+                markersize=style["marker_size"],
+                markerfacecolor=style["marker_face_color"],
+                markeredgecolor=style["marker_edge_color"],
+                markeredgewidth=style["marker_edge_width"],
+                label=style["label"],
             )
         else:
             ax.plot(
                 df[x_col],
                 y_data,
-                linewidth=line_width,
-                color=color,
-                label=col,
+                color=style["color"],
+                linestyle=style["line_style"],
+                linewidth=style["line_width"],
+                label=style["label"],
             )
 
-    ax.set_xlabel(x_label, fontsize=13, labelpad=8)
-    ax.set_ylabel(y_label, fontsize=13, labelpad=8)
+    ax.set_xlabel(x_label, fontsize=axis_label_fontsize, labelpad=8)
+    ax.set_ylabel(y_label, fontsize=axis_label_fontsize, labelpad=8)
 
     if title.strip():
-        ax.set_title(title, fontsize=13, pad=10)
+        ax.set_title(title, fontsize=axis_label_fontsize, pad=10)
 
     if x_min is not None or x_max is not None:
         ax.set_xlim(left=x_min, right=x_max)
@@ -145,14 +136,13 @@ def make_plot(
         ticks = [float(y.strip()) for y in custom_yticks.split(",") if y.strip()]
         ax.set_yticks(ticks)
 
-    # Origin-style ticks: inward, only major ticks, no grid
     ax.tick_params(
         axis="both",
         which="major",
         direction="in",
         length=5,
         width=1.2,
-        labelsize=11,
+        labelsize=tick_fontsize,
         top=False,
         right=False,
     )
@@ -160,7 +150,6 @@ def make_plot(
     ax.minorticks_off()
     ax.grid(False)
 
-    # Boxed axes like Origin
     for spine in ax.spines.values():
         spine.set_visible(True)
         spine.set_linewidth(1.4)
@@ -169,21 +158,13 @@ def make_plot(
     if show_legend:
         ax.legend(
             frameon=False,
-            fontsize=10,
-            loc="best",
+            fontsize=legend_fontsize,
+            loc=legend_location,
             handlelength=2.5,
         )
 
     fig.tight_layout()
     return fig
-
-
-def fig_to_bytes(fig, file_format="png", dpi=300):
-    """Convert matplotlib figure to downloadable bytes."""
-    buffer = io.BytesIO()
-    fig.savefig(buffer, format=file_format, dpi=dpi, bbox_inches="tight")
-    buffer.seek(0)
-    return buffer
 
 
 # ============================================================
@@ -250,12 +231,126 @@ y_label = st.sidebar.text_input("Y-axis label", value=f"Current ({current_unit})
 title = st.sidebar.text_input("Plot title", value="")
 
 st.sidebar.divider()
-st.sidebar.subheader("Style")
+st.sidebar.subheader("Global style")
 
-line_width = st.sidebar.slider("Line width", 0.5, 5.0, 2.0, 0.1)
-show_markers = st.sidebar.checkbox("Show markers", value=False)
-marker_size = st.sidebar.slider("Marker size", 1.0, 10.0, 4.0, 0.5)
+axis_label_fontsize = st.sidebar.slider("Axis label font size", 8, 24, 13, 1)
+tick_fontsize = st.sidebar.slider("Tick font size", 6, 20, 11, 1)
 show_legend = st.sidebar.checkbox("Show legend", value=True)
+legend_fontsize = st.sidebar.slider("Legend font size", 6, 20, 10, 1)
+legend_location = st.sidebar.selectbox(
+    "Legend position",
+    [
+        "best",
+        "upper right",
+        "upper left",
+        "lower left",
+        "lower right",
+        "center right",
+        "center left",
+        "lower center",
+        "upper center",
+        "center",
+    ],
+    index=0,
+)
+
+st.sidebar.divider()
+st.sidebar.subheader("Curve styles")
+
+origin_colors = ["black", "red", "blue", "green", "magenta", "orange", "purple", "brown"]
+line_styles = {
+    "Solid": "-",
+    "Dashed": "--",
+    "Dotted": ":",
+    "Dash-dot": "-.",
+}
+marker_styles = {
+    "Circle": "o",
+    "Square": "s",
+    "Triangle": "^",
+    "Diamond": "D",
+    "Cross": "x",
+    "Plus": "+",
+}
+
+curve_styles = {}
+
+for i, col in enumerate(y_cols):
+    with st.sidebar.expander(f"Style: {col}", expanded=(i < 2)):
+        label = st.text_input(
+            f"Legend label for {col}",
+            value=str(col),
+            key=f"label_{col}",
+        )
+        color = st.color_picker(
+            f"Line colour for {col}",
+            value=origin_colors[i % len(origin_colors)],
+            key=f"color_{col}",
+        )
+        line_width = st.slider(
+            f"Line width for {col}",
+            0.5,
+            6.0,
+            2.0,
+            0.1,
+            key=f"lw_{col}",
+        )
+        line_style_name = st.selectbox(
+            f"Line style for {col}",
+            list(line_styles.keys()),
+            index=0,
+            key=f"ls_{col}",
+        )
+        show_markers = st.checkbox(
+            f"Show markers for {col}",
+            value=False,
+            key=f"markers_{col}",
+        )
+        marker_name = st.selectbox(
+            f"Marker shape for {col}",
+            list(marker_styles.keys()),
+            index=1,
+            key=f"marker_shape_{col}",
+        )
+        marker_size = st.slider(
+            f"Marker size for {col}",
+            1.0,
+            12.0,
+            4.0,
+            0.5,
+            key=f"ms_{col}",
+        )
+        marker_face_color = st.color_picker(
+            f"Marker fill colour for {col}",
+            value=color,
+            key=f"mfc_{col}",
+        )
+        marker_edge_color = st.color_picker(
+            f"Marker edge colour for {col}",
+            value="#000000",
+            key=f"mec_{col}",
+        )
+        marker_edge_width = st.slider(
+            f"Marker edge width for {col}",
+            0.0,
+            3.0,
+            0.5,
+            0.1,
+            key=f"mew_{col}",
+        )
+
+        curve_styles[col] = {
+            "label": label,
+            "color": color,
+            "line_width": line_width,
+            "line_style": line_styles[line_style_name],
+            "show_markers": show_markers,
+            "marker": marker_styles[marker_name],
+            "marker_size": marker_size,
+            "marker_face_color": marker_face_color,
+            "marker_edge_color": marker_edge_color,
+            "marker_edge_width": marker_edge_width,
+        }
 
 st.sidebar.divider()
 st.sidebar.subheader("Axis limits")
@@ -311,10 +406,11 @@ try:
         x_label=x_label,
         y_label=y_label,
         title=title,
-        line_width=line_width,
-        show_markers=show_markers,
-        marker_size=marker_size,
         show_legend=show_legend,
+        legend_fontsize=legend_fontsize,
+        legend_location=legend_location,
+        axis_label_fontsize=axis_label_fontsize,
+        tick_fontsize=tick_fontsize,
         x_min=x_min,
         x_max=x_max,
         y_min=y_min,
@@ -324,6 +420,7 @@ try:
         figure_width=figure_width,
         figure_height=figure_height,
         dpi=dpi,
+        curve_styles=curve_styles,
     )
 except Exception as e:
     st.error(f"Could not create plot: {e}")
