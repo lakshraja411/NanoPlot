@@ -334,16 +334,40 @@ legend_y = st.sidebar.slider(
 st.sidebar.divider()
 st.sidebar.subheader("Curve styles")
 
-origin_colors = [
-    "#000000",  # black
-    "#FF0000",  # red
-    "#0000FF",  # blue
-    "#008000",  # green
-    "#FF00FF",  # magenta
-    "#FFA500",  # orange
-    "#800080",  # purple
-    "#8B4513",  # brown
-]
+palette_presets = {
+    "Origin Classic": [
+        "#000000", "#FF0000", "#0000FF", "#008000",
+        "#FF00FF", "#FFA500", "#800080", "#8B4513",
+    ],
+    "Colorblind Safe / Okabe-Ito": [
+        "#000000", "#E69F00", "#56B4E9", "#009E73",
+        "#F0E442", "#0072B2", "#D55E00", "#CC79A7",
+        "#666666", "#003F5C", "#2A9D8F", "#006400",
+    ],
+    "Nature Muted": [
+        "#000000", "#1B9E77", "#D95F02", "#7570B3",
+        "#E7298A", "#66A61E", "#E6AB02", "#A6761D",
+        "#666666", "#1F78B4", "#B15928", "#6A3D9A",
+    ],
+    "Viridis Sequential": [
+        "#000000", "#440154", "#482878", "#3E4989",
+        "#31688E", "#26828E", "#1F9E89", "#35B779",
+        "#6DCD59", "#B4DE2C", "#FDE725", "#FFD700",
+    ],
+    "GFAP Sequential": [
+        "#000000", "#440154", "#482878", "#31688E",
+        "#21918C", "#35B779", "#73D055", "#B8DE29",
+        "#FDE725", "#F4A261", "#E76F51", "#D62828",
+    ],
+}
+
+selected_palette_name = st.sidebar.selectbox(
+    "Colour palette",
+    list(palette_presets.keys()),
+    index=4,
+)
+
+origin_colors = palette_presets[selected_palette_name]
 line_styles = {
     "Solid": "-",
     "Dashed": "--",
@@ -373,11 +397,13 @@ for i, col in enumerate(y_cols):
             value=origin_colors[i % len(origin_colors)],
             key=f"color_{col}",
         )
+        default_line_width = 3.2 if i == 0 else 2.2
+
         line_width = st.slider(
             f"Line width for {col}",
             0.5,
             6.0,
-            2.0,
+            default_line_width,
             0.1,
             key=f"lw_{col}",
         )
